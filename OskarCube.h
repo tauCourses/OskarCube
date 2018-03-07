@@ -25,7 +25,6 @@ class Node {
 public:
     explicit Node(position pos);
     Node() = default;
-    Node& operator=(Node&& rhs) noexcept ;
     position pos{};
     Node *father = nullptr;
 };

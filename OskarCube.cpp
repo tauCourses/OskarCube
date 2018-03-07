@@ -129,11 +129,6 @@ std::size_t position::positionHasher::operator()(const position &c) const { //po
 Node::Node(position pos) : pos(pos){
 }
 
-Node &Node::operator=(Node &&rhs) noexcept { //c++ shit :-\
-    this->pos = rhs.pos;
-    return *this;
-}
-
 bool position::operator==(const position &rhs) const { //compare between two positions
     return this->x==rhs.x && this->y == rhs.y && this->z == rhs.z;
 }
