@@ -13,7 +13,8 @@ int main(int argc, char** argv) {
         else
             cout << "no solution found!" << endl;
     }
-    catch (string& e){
+    catch (const char* c){
+        cout << c << endl;
         return -1;
     }
     return 0;

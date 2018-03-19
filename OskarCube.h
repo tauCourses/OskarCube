@@ -31,7 +31,6 @@ public:
 
 class OskarCube {
 private:
-    //vector<Node> nodes;
     unordered_map<position, Node, position::positionHasher> nodesMap;
     list<Node*> queue;
     vector<vector<bool>> xy,yz,zx;
@@ -39,16 +38,17 @@ private:
     position origin, destination;
 
     void addNode(Node* n, position p);
+    void getEmptyLine(ifstream &fin);
     position getQubeSize(ifstream& fin);
     vector<vector<bool>> getFace(ifstream& fin, int first, int second);
     bool validPosition(position p);
 
+    int getFatherCommand(Node *pNode);
+
 public:
     explicit OskarCube(string fileName, position origin, position destination);
-    bool trySolve();
-    void getCommands();
-
-    int getFatherCommand(Node *pNode);
+    bool trySolve(); //run BFS, return true if destination found
+    void getCommands(); //print commands for the path from origin to destination
 };
 
 

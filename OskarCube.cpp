@@ -9,11 +9,11 @@ OskarCube::OskarCube(string fileName, position origin, position destination) : o
         throw fileName;
     }
     this->size = this->getQubeSize(fin);
-    string line;
+
     this->xy = this->getFace(fin,size.x,size.y); //get xy table
-    getline(fin, line);
+    getEmptyLine(fin);
     this->yz = this->getFace(fin,size.y,size.z); //get yz table
-    getline(fin, line);
+    getEmptyLine(fin);
     this->zx = this->getFace(fin,size.z,size.x); //get zx table
 }
 
@@ -28,19 +28,31 @@ position OskarCube::getQubeSize(ifstream &fin) {
     return {x,y,z};
 }
 
+void OskarCube::getEmptyLine(ifstream &fin)
+{
+    static auto isspaceLambda = [](unsigned char const c) { return std::isspace(c); };
+    string line;
+    getline(fin, line);
+    if(!all_of(line.begin(),line.end(),isspaceLambda))
+        throw "parse file failed - no empty line between two tables";
+}
+
 vector<vector<bool>> OskarCube::getFace(ifstream &fin, int first, int second) { //parse 2d boolean table
     vector<vector<bool>> face(static_cast<unsigned long>(second), vector<bool>(static_cast<unsigned long>(first)));
     string line;
-    int number;
     for(int i=0;i<second;i++)
     {
         getline(fin, line);
+        if(line.empty())
+            throw "parse file failed - puzzle size not fitting actual size";
         stringstream iss(line);
+        istream_iterator<string> begin(iss), end;
+        vector<string> vstrings(begin, end);
+
+        if(vstrings.size() != first)
+            throw "parse file failed - puzzle size not fitting actual size";
         for(int j=0; j<first; j++)
-        {
-            iss >> number;
-            face[i][j] = (number == 0);
-        }
+            face[i][j] = (vstrings[j] == "0");
     }
 
     return face;
@@ -88,11 +100,11 @@ void OskarCube::getCommands() { //follows the track from destinationto origin wi
 
 int OskarCube::getFatherCommand(Node *pNode) {
     if(pNode->father->pos.x != pNode->pos.x)
-        return 0 + ((pNode->father->pos.x - pNode->pos.x) + 1) / 2;
+        return 0 + (pNode->father->pos.x == pNode->pos.x + 1);
     if(pNode->father->pos.y != pNode->pos.y)
-        return 2 +  ((pNode->father->pos.y - pNode->pos.y) + 1) / 2;
+        return 2 +  (pNode->father->pos.y == pNode->pos.y + 1);
     if(pNode->father->pos.z != pNode->pos.z)
-        return 4 + ((pNode->father->pos.z - pNode->pos.z) + 1) / 2;
+        return 4 + (pNode->father->pos.z == pNode->pos.z + 1);
 
     cout << "problem!!!" << endl;
     return -1;
@@ -118,8 +130,7 @@ bool OskarCube::validPosition(position p) { //check if a position is valid - ins
 }
 
 std::size_t position::positionHasher::operator()(const position &c) const { //position hash function. for unorder map
-    size_t res = 0;
-    res = res * 31 + hash<int>()(c.x);
+    size_t res = hash<int>()(c.x);
     res = res * 31 + hash<int>()(c.y);
     res = res * 31 + hash<int>()(c.z);
 
